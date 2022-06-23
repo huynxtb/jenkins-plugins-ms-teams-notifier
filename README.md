@@ -40,7 +40,7 @@ There are a few options you can choose from:
   - Time Zone
     - By default, this will set time zone is UTC ([Get Time Zone here](https://docs.oracle.com/middleware/1221/wcs/tag-ref/MISC/TimeZones.html)).
 
-![Advanced tab in the config](https://imgur.com/ucTgisL.png)
+![Advanced tab in the config](https://i.imgur.com/EiOJxsd.png)
 
 ## Pipeline
 
