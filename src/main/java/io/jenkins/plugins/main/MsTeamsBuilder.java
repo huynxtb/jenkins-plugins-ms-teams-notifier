@@ -64,7 +64,7 @@ public class MsTeamsBuilder extends Notifier {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         final EnvVars env = build.getEnvironment(listener);
-        String buildNumber = "#" + env.get("BUILD_NUMBER");
+        String buildNumber = " #" + env.get("BUILD_NUMBER");
         String commitId = env.get("COMMIT_ID");
         String jobName = "";
         JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();

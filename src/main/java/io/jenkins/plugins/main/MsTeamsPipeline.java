@@ -131,7 +131,7 @@ public class MsTeamsPipeline extends AbstractStepImpl {
             String liJobLink = "";
             String liWebLink = "";
             String liBranchName = "";
-            String bNumber = pipeline.getBuildNumber() != 0 ? "#" + pipeline.getBuildNumber() : "";
+            String bNumber = pipeline.getBuildNumber() != 0 ? " #" + pipeline.getBuildNumber() : "";
             listener.getLogger().println("Starting Microsoft Teams Notifier");
 
             if (pipeline.getWebhookURL() == null)
