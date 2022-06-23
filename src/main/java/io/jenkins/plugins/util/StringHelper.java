@@ -7,9 +7,10 @@ import hudson.model.Result;
 import io.jenkins.plugins.constants.MessageConst;
 import io.jenkins.plugins.enums.StatusColor;
 import io.jenkins.plugins.exception.AppException;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class StringHelper {
 
@@ -32,9 +33,18 @@ public class StringHelper {
         }
     }
 
-    public static String toDateTimeNow() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        LocalDateTime now = LocalDateTime.now();
-        return dtf.format(now);
+    public static String toDateTimeNow(String timeZone) {
+        try {
+            Date date = new Date();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            df.setTimeZone(TimeZone.getTimeZone(timeZone));
+            return df.format(date);
+        }catch (Exception e){
+            try {
+                throw new AppException("Time zone invalid.");
+            } catch (AppException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 }

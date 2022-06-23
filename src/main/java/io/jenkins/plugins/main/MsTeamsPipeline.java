@@ -34,17 +34,19 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     private String webUrl;
     private int buildNumber;
 
+    private String timeZone;
+
     @DataBoundConstructor
     public MsTeamsPipeline(String webhookURL) {
         this.webhookURL = webhookURL;
     }
 
     public String getWebhookURL() {
-        return webhookURL;
+        return this.webhookURL;
     }
 
     public String getBranchName() {
-        return branchName;
+        return this.branchName;
     }
 
     @DataBoundSetter
@@ -53,7 +55,7 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     @DataBoundSetter
@@ -62,7 +64,7 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public String getJobLink() {
-        return jobLink;
+        return this.jobLink;
     }
 
     @DataBoundSetter
@@ -71,7 +73,7 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     @DataBoundSetter
@@ -80,7 +82,7 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public String getCommitId() {
-        return commitId;
+        return this.commitId;
     }
 
     @DataBoundSetter
@@ -94,11 +96,11 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public String getResult() {
-        return result;
+        return this.result;
     }
 
     public String getWebUrl() {
-        return webUrl;
+        return this.webUrl;
     }
 
     @DataBoundSetter
@@ -107,12 +109,21 @@ public class MsTeamsPipeline extends AbstractStepImpl {
     }
 
     public int getBuildNumber() {
-        return buildNumber;
+        return this.buildNumber;
     }
 
     @DataBoundSetter
     public void setBuildNumber(int buildNumber) {
         this.buildNumber = buildNumber;
+    }
+
+    public String getTimeZone() {
+        return this.timeZone;
+    }
+
+    @DataBoundSetter
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 
     public static class MsTeamsPipelineExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
@@ -126,7 +137,8 @@ public class MsTeamsPipeline extends AbstractStepImpl {
 
         @Override
         protected Void run() throws AppException {
-            String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow() + "</li>";
+            String timeZoneId = (pipeline.getTimeZone() != null) ? pipeline.getTimeZone() : "UTC";
+            String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow(timeZoneId) + "</li>";
             String liCommitId = "";
             String liJobLink = "";
             String liWebLink = "";

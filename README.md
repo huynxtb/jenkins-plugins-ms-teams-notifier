@@ -1,6 +1,6 @@
 # Read Me
 
-[//]: # (This repo has been moved to [jenkinsci organization]&#40;https://github.com/jenkinsci/discord-notifier-plugin&#41;. Please submit issues/PRs there.)
+[//]: # (This repo has been moved to [jenkinsci organization]&#40;https://github.com/jenkinsci/notifier-plugin&#41;. Please submit issues/PRs there.)
 
 # Microsoft Teams Notifier
 
@@ -27,7 +27,7 @@ After installing, go to your job's configure section and add the **Microsoft Tea
 There are a few options you can choose from:
 
 - Webhook URL
-  - The URL of the webhook provided by Microsoft Teams
+  - The URL of the webhook provided by Microsoft Teams ([Get Webhook URL here](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)).
 - Advanced:
   - Branch
     - If set, the branch will show up on the Microsoft Teams message.
@@ -37,17 +37,19 @@ There are a few options you can choose from:
     - If set, the web url will show up on the Microsoft Teams message
   - Description
     - If set, the web url will show up on the Microsoft Teams message
+  - Time Zone
+    - By default, this will set time zone is UTC ([Get Time Zone here](https://docs.oracle.com/middleware/1221/wcs/tag-ref/MISC/TimeZones.html)).
 
 ![Advanced tab in the config](https://imgur.com/ucTgisL.png)
 
 ## Pipeline
 
-Discord Notifier supports Jenkins Pipeline. The only required parameter is webhookURL (the URL of the webhook, of course) - but there isn't much point of sending nothing.
+Microsoft Teams Notifier supports Jenkins Pipeline. The only required parameter is webhookURL (the URL of the webhook, of course) - but there isn't much point of sending nothing.
 
 ### Parameters
 
 - webhookURL (required)
-  - The URL of the webhook (pretty self-explanatory) provided by Discord.
+  - The URL of the webhook (pretty self-explanatory) provided by Microsoft Teams ([Get Webhook URL here](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)). 
 - title (required)
   - The title of the message.
 - result (required)
@@ -64,6 +66,8 @@ Discord Notifier supports Jenkins Pipeline. The only required parameter is webho
   - If set, the job url will show on the message.
 - buildNumber
   - If set, current build number build will show.
+- timeZone
+  - By default, this will set time zone is UTC ([Get Time Zone here](https://docs.oracle.com/middleware/1221/wcs/tag-ref/MISC/TimeZones.html)).
 
 ### Example
 
@@ -73,7 +77,7 @@ pipeline {
 
   post {
     always {
-      	msTeamsNotifier webhookURL: 'YOUR_WEBHOOK_URL', title: JOB_NAME, branchName: GIT_BRANCH, commitId: GIT_COMMIT.substring(0, 7), description: 'This is job test', result: currentBuild.currentResult, webUrl: 'https://www.jenkins.io/', jobLink: BUILD_URL, buildNumber: currentBuild.number
+      	msTeamsNotifier webhookURL: 'YOUR_WEBHOOK_URL', title: JOB_NAME, branchName: GIT_BRANCH, commitId: GIT_COMMIT.substring(0, 7), description: 'This is job test', result: currentBuild.currentResult, webUrl: 'https://www.jenkins.io/', jobLink: BUILD_URL, buildNumber: currentBuild.number, timeZone: 'Asia/Bangkok'
     }
   }
 }

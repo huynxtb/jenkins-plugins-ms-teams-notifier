@@ -36,14 +36,16 @@ public class MsTeamsBuilder extends Notifier {
     private final String title;
     private final String webUrl;
     private final String description;
+    private final String timeZone;
 
     @DataBoundConstructor
-    public MsTeamsBuilder(String webhookURL, String branchName, String title, String description, String webUrl) {
+    public MsTeamsBuilder(String webhookURL, String branchName, String title, String description, String webUrl, String timeZone) {
         this.webhookURL = webhookURL;
         this.title = title;
         this.description = description;
         this.webUrl = webUrl;
         this.branchName = branchName;
+        this.timeZone = timeZone;
     }
 
     public String getWebhookURL() {return this.webhookURL;}
@@ -56,6 +58,8 @@ public class MsTeamsBuilder extends Notifier {
 
     public String getDescription() {return this.description;}
 
+    public String getTimeZone() {return this.timeZone;}
+
     @Override
     public boolean needsToRunAfterFinalized() {
         return true;
@@ -64,13 +68,21 @@ public class MsTeamsBuilder extends Notifier {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         final EnvVars env = build.getEnvironment(listener);
+        String timeZoneId = "UTC";
+
+        if (this.timeZone != null) {
+            if(this.timeZone.length() > 0){
+                timeZoneId = this.timeZone;
+            }
+        }
+
         String buildNumber = " #" + env.get("BUILD_NUMBER");
         String commitId = env.get("COMMIT_ID");
         String jobName = "";
         JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
         Result result = null;
         Result buildResult = build.getResult();
-        String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow() + "</li>";
+        String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow(timeZoneId) + "</li>";
         String liCommitId = "";
         String liJobLink = globalConfig.getUrl() + build.getUrl();
         String liWebLink = "";
@@ -89,25 +101,25 @@ public class MsTeamsBuilder extends Notifier {
             throw new RuntimeException(e);
         }
 
-        if (env.expand(this.description) != null)
-            if (env.expand(this.description).length() > 0)
-                sections.add(new SectionDto("<p>" + env.expand(this.description) + "</p>"));
+        if (this.description != null)
+            if (this.description.length() > 0)
+                sections.add(new SectionDto("<p>" + this.description + "</p>"));
 
-        if (env.expand(this.branchName) != null)
-            if (env.expand(this.branchName).length() > 0)
-                liBranchName = "<li>Branch: " + env.expand(this.branchName) + "</li>";
+        if (this.branchName != null)
+            if (this.branchName.length() > 0)
+                liBranchName = "<li>Branch: " + this.branchName + "</li>";
 
         if (commitId != null)
             if (commitId.length() > 0)
                 liCommitId = "<li>Commit ID: " + commitId + "</li>";
 
-        if (env.expand(this.webUrl) != null) {
-            if (env.expand(this.webUrl).length() > 0)
-                if (!Validation.isUrl(env.expand(this.webUrl))){
+        if (this.webUrl != null) {
+            if (this.webUrl.length() > 0)
+                if (!Validation.isUrl(this.webUrl)){
                     listener.getLogger().println("Web Url invalid.");
                     return false;
                 }
-            liWebLink = "<li>Web URL: <a href='" + env.expand(this.webUrl) + "'>Go to site</a></li>";
+            liWebLink = "<li>Web URL: <a href='" + this.webUrl + "'>Go to site</a></li>";
         }
 
         if (liJobLink.length() > 0) {
@@ -120,9 +132,9 @@ public class MsTeamsBuilder extends Notifier {
             liJobLink = "<li>View build: <a href='" + liJobLink + "'>Go to view</a></li>";
         }
 
-        if (env.expand(this.title) != null) {
-            if (env.expand(this.title).length() > 0)
-                jobName = env.expand(this.title);
+        if (this.title != null) {
+            if (this.title.length() > 0)
+                jobName = this.title;
         }else{
             jobName = build.getProject().getDisplayName();
         }
