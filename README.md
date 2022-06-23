@@ -22,7 +22,7 @@ This plugin uses the post-build feature to execute a request.
 
 After installing, go to your job's configure section and add the **Microsoft Teams Notifier** item. Then proceed to enter your webhook URL.
 
-![Post-build dropdown with Microsoft Teams Notifier Webhooks selected](https://imgur.com/28tUU2b)
+![Post-build dropdown with Microsoft Teams Notifier Webhooks selected](https://imgur.com/28tUU2b.png)
 
 There are a few options you can choose from:
 
@@ -38,7 +38,7 @@ There are a few options you can choose from:
   - Description
     - If set, the web url will show up on the Microsoft Teams message
 
-![Advanced tab in the config](https://imgur.com/ucTgisL)
+![Advanced tab in the config](https://imgur.com/ucTgisL.png)
 
 ## Pipeline
 
