@@ -1,0 +1,20 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:entry title="Webhook Url" field="webhookURL">
+    <f:textbox />
+  </f:entry>
+  <f:advanced>
+    <f:entry title="Branch" field="branchName">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="Title" field="title">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="Web URL" field="webUrl">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="Description" field="description">
+      <f:textbox />
+    </f:entry>
+  </f:advanced>
+</j:jelly>
