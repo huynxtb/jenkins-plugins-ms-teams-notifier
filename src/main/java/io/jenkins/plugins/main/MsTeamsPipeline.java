@@ -17,10 +17,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class MsTeamsPipeline extends AbstractStepImpl {
@@ -215,7 +212,6 @@ public class MsTeamsPipeline extends AbstractStepImpl {
             return "msTeamsNotifier";
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return "Send a message to Webhook URL";

@@ -24,10 +24,7 @@ import io.jenkins.plugins.util.WebhookCaller;
 import jenkins.model.JenkinsLocationConfiguration;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class MsTeamsBuilder extends Notifier {
