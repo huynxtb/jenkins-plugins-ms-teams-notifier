@@ -3,10 +3,7 @@ package io.jenkins.plugins.main;
 import hudson.Extension;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.constants.AppConst;
-import io.jenkins.plugins.dto.AttachmentDto;
-import io.jenkins.plugins.dto.ContentDto;
-import io.jenkins.plugins.dto.MainBodyDto;
-import io.jenkins.plugins.dto.SectionDto;
+import io.jenkins.plugins.dto.*;
 import io.jenkins.plugins.exception.AppException;
 import io.jenkins.plugins.util.StringHelper;
 import io.jenkins.plugins.util.Validation;
@@ -17,6 +14,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
 import javax.inject.Inject;
 import java.util.ArrayList;
 
@@ -135,18 +133,12 @@ public class MsTeamsPipeline extends AbstractStepImpl {
         @Override
         protected Void run() throws AppException {
             String timeZoneId = (pipeline.getTimeZone() != null) ? pipeline.getTimeZone() : "UTC";
-            String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow(timeZoneId) + "</li>";
-            String liCommitId = "";
-            String liJobLink = "";
-            String liWebLink = "";
-            String liBranchName = "";
-            String bNumber = pipeline.getBuildNumber() != 0 ? " #" + pipeline.getBuildNumber() : "";
             listener.getLogger().println("Starting Microsoft Teams Notifier");
 
             if (pipeline.getWebhookURL() == null)
                 throw new AppException("Webhook Url is required. Following this way: msTeamsNotifier webhookURL: 'YOUR_WEBHOOK'");
 
-            if(!Validation.isUrl(pipeline.getWebhookURL()))
+            if (!Validation.isUrl(pipeline.getWebhookURL()))
                 throw new AppException("Webhook URL invalid.");
 
             if (pipeline.getTitle() == null)
@@ -155,48 +147,37 @@ public class MsTeamsPipeline extends AbstractStepImpl {
             if (pipeline.getResult() == null)
                 throw new AppException("Result is required. Following this way: msTeamsNotifier result: currentBuild.currentResult");
 
-            ArrayList<SectionDto> sections = new ArrayList<SectionDto>();
-            sections.add(new SectionDto(StringHelper.getHeader(pipeline.getResult(), bNumber)));
+            BindingControlDto dto = new BindingControlDto(pipeline.getResult(), pipeline.getTitle(), pipeline.getDescription());
+            ArrayList<FactDto> facts = new ArrayList<>();
 
-            if (pipeline.getDescription() != null)
-                sections.add(new SectionDto("<p>" + pipeline.getDescription() + "</p>"));
+            facts.add(new FactDto("Status:", dto.getNormalStatus()));
+            facts.add(new FactDto("Build At:", StringHelper.toDateTimeNow(timeZoneId)));
+            if (pipeline.getBuildNumber() != 0)
+                facts.add(new FactDto("Build Number:", String.valueOf(pipeline.getBuildNumber())));
+            if (pipeline.getBranchName() != null) facts.add(new FactDto("Branch:", pipeline.getBranchName()));
+            if (pipeline.getCommitId() != null) facts.add(new FactDto("Commit ID:", pipeline.getCommitId()));
 
-            if (pipeline.getBranchName() != null)
-                liBranchName = "<li>Branch: " + pipeline.getBranchName() + "</li>";
-
-            if (pipeline.getCommitId() != null)
-                liCommitId = "<li>Commit ID: " + pipeline.getCommitId() + "</li>";
-
-            if (pipeline.getWebUrl() != null){
-                if(!Validation.isUrl(pipeline.getWebUrl()))
-                    throw new AppException("Web Url invalid.");
-                liWebLink = "<li>Web URL: <a href='" + pipeline.getWebUrl() + "'>Go to site</a></li>";
-            }
-
-            if (pipeline.getJobLink() != null){
-                if(!Validation.isUrl(pipeline.getJobLink()))
+            if (pipeline.getJobLink() != null) {
+                if (!Validation.isUrl(pipeline.getJobLink()))
                     throw new AppException("Job Link invalid.");
-                liJobLink = "<li>View build: <a href='" + pipeline.getJobLink() + "'>Go to view</a></li>";
+                dto.setJobLink(pipeline.getJobLink());
             }
 
-            if (liBranchName.length() > 0) sections.add(new SectionDto(liBranchName));
-            if (liCommitId.length() > 0) sections.add(new SectionDto(liCommitId));
-            sections.add(new SectionDto(liDateBuild));
-            if (liWebLink.length() > 0) sections.add(new SectionDto(liWebLink));
-            if (liJobLink.length() > 0) sections.add(new SectionDto(liJobLink));
-
-            ContentDto contentDto = new ContentDto(pipeline.getTitle(), sections);
-            ArrayList<AttachmentDto> attachments = new ArrayList<AttachmentDto>();
-            attachments.add(new AttachmentDto(contentDto));
-            MainBodyDto mainBodyDto = new MainBodyDto(attachments);
+            if (pipeline.getWebUrl() != null) {
+                if (!Validation.isUrl(pipeline.getWebUrl()))
+                    throw new AppException("Web Url invalid.");
+                dto.setWebUrl(pipeline.getWebUrl());
+            }
 
             try {
-                WebhookCaller caller = new WebhookCaller(pipeline.getWebhookURL(), mainBodyDto);
-                caller.send();
+                WebhookCaller caller = new WebhookCaller(pipeline.getWebhookURL());
+                caller.send(facts, dto);
 
                 listener.getLogger().println(AppConst.APP_NAME + " " + AppConst.VERSION + " - " + AppConst.AUTHOR);
                 listener.getLogger().println("Sending notification to Microsoft Teams.");
-            } catch (Exception e) {e.printStackTrace(listener.getLogger());}
+            } catch (Exception e) {
+                e.printStackTrace(listener.getLogger());
+            }
             return null;
         }
     }

@@ -4,22 +4,22 @@ public enum StatusColor {
     /**
      * Green when send success.
      */
-    GREEN("#28A745"),
+    GREEN("Good"),
 
     /**
      * Yellow when send unstable.
      */
-    YELLOW("#FFEB3B"),
+    YELLOW("Warning"),
 
     /**
      * Gray when send aborted.
      */
-    GRAY("#A9A9A9"),
+    GRAY("Light"),
 
     /**
      * Red when send fail.
      */
-    RED("#DC3545");
+    RED("Attention");
 
     private String color;
 

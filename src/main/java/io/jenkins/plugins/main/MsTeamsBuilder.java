@@ -13,10 +13,9 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.constants.AppConst;
-import io.jenkins.plugins.dto.AttachmentDto;
-import io.jenkins.plugins.dto.ContentDto;
-import io.jenkins.plugins.dto.MainBodyDto;
-import io.jenkins.plugins.dto.SectionDto;
+import io.jenkins.plugins.constants.MessageConst;
+import io.jenkins.plugins.constants.ResultConst;
+import io.jenkins.plugins.dto.*;
 import io.jenkins.plugins.exception.AppException;
 import io.jenkins.plugins.util.StringHelper;
 import io.jenkins.plugins.util.Validation;
@@ -73,83 +72,49 @@ public class MsTeamsBuilder extends Notifier {
             }
         }
 
-        String buildNumber = " #" + env.get("BUILD_NUMBER");
+        String buildNumber = "" + env.get("BUILD_NUMBER");
         String commitId = env.get("COMMIT_ID");
-        String jobName = "";
         JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
-        Result result = null;
+        String result = "";
         Result buildResult = build.getResult();
-        String liDateBuild = "<li>Build date: " + StringHelper.toDateTimeNow(timeZoneId) + "</li>";
-        String liCommitId = "";
-        String liJobLink = globalConfig.getUrl() + build.getUrl();
-        String liWebLink = "";
-        String liBranchName = "";
+        String jobLink = globalConfig.getUrl() + build.getUrl();
 
         if (buildResult != null && !buildResult.isCompleteBuild()) return true;
-        if (buildResult != null && buildResult.isBetterOrEqualTo(Result.SUCCESS)) result = Result.SUCCESS;
-        if (buildResult != null && buildResult.isWorseThan(Result.SUCCESS)) result = Result.UNSTABLE;
-        if (buildResult != null && buildResult.isWorseThan(Result.UNSTABLE)) result = Result.FAILURE;
+        if (buildResult != null && buildResult.isBetterOrEqualTo(Result.SUCCESS)) result = ResultConst.SUCCESS;
+        if (buildResult != null && buildResult.isWorseThan(Result.SUCCESS)) result = ResultConst.UNSTABLE;
+        if (buildResult != null && buildResult.isWorseThan(Result.UNSTABLE)) result = ResultConst.FAILURE;
 
-        ArrayList<SectionDto> sections = new ArrayList<SectionDto>();
-        try {
-            if (result != null)
-                sections.add(new SectionDto(StringHelper.getHeader(result.toString(), buildNumber)));
-        } catch (AppException e) {
-            throw new RuntimeException(e);
-        }
+        BindingControlDto dto = new BindingControlDto(result, this.title, this.description);
+        ArrayList<FactDto> facts = new ArrayList<>();
 
-        if (this.description != null)
-            if (this.description.length() > 0)
-                sections.add(new SectionDto("<p>" + this.description + "</p>"));
+        facts.add(new FactDto("Status:", dto.getNormalStatus()));
+        facts.add(new FactDto("Build At:", StringHelper.toDateTimeNow(timeZoneId)));
+        if (!buildNumber.equals("")) facts.add(new FactDto("Build Number:", buildNumber));
+        if (this.branchName != null) facts.add(new FactDto("Branch:", this.branchName));
+        if (commitId != null) facts.add(new FactDto("Commit ID:", commitId));
 
-        if (this.branchName != null)
-            if (this.branchName.length() > 0)
-                liBranchName = "<li>Branch: " + this.branchName + "</li>";
-
-        if (commitId != null)
-            if (commitId.length() > 0)
-                liCommitId = "<li>Commit ID: " + commitId + "</li>";
-
-        if (this.webUrl != null) {
-            if (this.webUrl.length() > 0)
-                if (!Validation.isUrl(this.webUrl)){
-                    listener.getLogger().println("Web Url invalid.");
-                    return false;
+        if (globalConfig.getUrl() != null){
+            if(!Validation.isUrl(jobLink))
+                try {
+                    throw new AppException("Job Link invalid.");
+                } catch (AppException e) {
+                    throw new RuntimeException(e);
                 }
-            liWebLink = "<li>Web URL: <a href='" + this.webUrl + "'>Go to site</a></li>";
-        }
+        }else dto.setJobLink("");
 
-        if (liJobLink.length() > 0) {
-            if(globalConfig.getUrl()!=null){
-                if (!Validation.isUrl(liJobLink)){
-                    listener.getLogger().println("Job Link invalid.");
-                    return false;
+        if (this.webUrl != null){
+            if(!Validation.isUrl(this.webUrl))
+                try {
+                    throw new AppException("Web Url invalid.");
+                } catch (AppException e) {
+                    throw new RuntimeException(e);
                 }
-            }
-            liJobLink = "<li>View build: <a href='" + liJobLink + "'>Go to view</a></li>";
+            dto.setWebUrl(this.webUrl);
         }
-
-        if (this.title != null) {
-            if (this.title.length() > 0)
-                jobName = this.title;
-        }else{
-            jobName = build.getProject().getDisplayName();
-        }
-
-        if (liBranchName.length() > 0) sections.add(new SectionDto(liBranchName));
-        if (liCommitId.length() > 0) sections.add(new SectionDto(liCommitId));
-        sections.add(new SectionDto(liDateBuild));
-        if (liWebLink.length() > 0) sections.add(new SectionDto(liWebLink));
-        if (liJobLink.length() > 0) sections.add(new SectionDto(liJobLink));
-
-        ContentDto contentDto = new ContentDto(jobName, sections);
-        ArrayList<AttachmentDto> attachments = new ArrayList<AttachmentDto>();
-        attachments.add(new AttachmentDto(contentDto));
-        MainBodyDto mainBodyDto = new MainBodyDto(attachments);
 
         try {
-            WebhookCaller caller = new WebhookCaller(this.webhookURL, mainBodyDto);
-            caller.send();
+            WebhookCaller caller = new WebhookCaller(this.webhookURL);
+            caller.send(facts, dto);
 
             listener.getLogger().println(AppConst.APP_NAME + " " + AppConst.VERSION + " - " + AppConst.AUTHOR);
             listener.getLogger().println("Sending notification to Microsoft Teams.");
