@@ -14,7 +14,6 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-
 import javax.inject.Inject;
 import java.util.ArrayList;
 

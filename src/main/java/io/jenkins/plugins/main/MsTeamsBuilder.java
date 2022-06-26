@@ -13,7 +13,6 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import io.jenkins.plugins.constants.AppConst;
-import io.jenkins.plugins.constants.MessageConst;
 import io.jenkins.plugins.constants.ResultConst;
 import io.jenkins.plugins.dto.*;
 import io.jenkins.plugins.exception.AppException;
