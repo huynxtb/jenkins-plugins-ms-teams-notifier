@@ -11,6 +11,6 @@ node {
     }
 
     stage('Archive') {
-        archiveArtifacts 'target/microsoft-team-notifier.hpi'
+        archiveArtifacts 'target/microsoft-teams-notifier.hpi'
     }
 }
